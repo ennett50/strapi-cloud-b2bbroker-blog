@@ -374,12 +374,16 @@ export interface ApiArticleArticle extends Schema.CollectionType {
     draftAndPublish: true;
   };
   attributes: {
-    title: Attribute.String;
-    description: Attribute.Text &
-      Attribute.SetMinMaxLength<{
-        maxLength: 80;
-      }>;
-    cover: Attribute.Media;
+    title: Attribute.String & Attribute.Required;
+    intro: Attribute.Text & Attribute.Required;
+    cover: Attribute.Media & Attribute.Required;
+    content: Attribute.RichText & Attribute.Required;
+    seo: Attribute.Component<'shared.seo'>;
+    comments: Attribute.Relation<
+      'api::article.article',
+      'oneToMany',
+      'api::comment.comment'
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
@@ -391,6 +395,40 @@ export interface ApiArticleArticle extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::article.article',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiCommentComment extends Schema.CollectionType {
+  collectionName: 'comments';
+  info: {
+    singularName: 'comment';
+    pluralName: 'comments';
+    displayName: 'Comment';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    text: Attribute.Text & Attribute.Required;
+    article: Attribute.Relation<
+      'api::comment.comment',
+      'manyToOne',
+      'api::article.article'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::comment.comment',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::comment.comment',
       'oneToOne',
       'admin::user'
     > &
@@ -863,6 +901,7 @@ declare module '@strapi/types' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'api::article.article': ApiArticleArticle;
+      'api::comment.comment': ApiCommentComment;
       'api::global.global': ApiGlobalGlobal;
       'plugin::upload.file': PluginUploadFile;
       'plugin::upload.folder': PluginUploadFolder;
